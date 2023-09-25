@@ -2,23 +2,32 @@ const express = require('express');
 const router = express.Router();
 const Category = require('./../../models/categories');
 const SubCategory = require('./../../models/subcategories');
+const Product = require('./../../models/produtcs')
 
 router.get('/categories', async (req, res) => {
     try {
         let searchCategories = await Category.find({}, null);
         res.status(200).json(searchCategories);
     } catch (error) {
-        res.status(500).json({message: "O servidor não conseguiu encontrar o que lhe foi solicitado."})
+        res.status(500).json({message: "O servidor não conseguiu encontrar o que foi solicitado."})
     }
 })
 
 router.get('/categories/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        let searchCategoriesID = await Category.findById(id);
-        res.status(200).json(searchCategoriesID)
+        const searchCategoriesID = await Category.findById(id);
+
+        if(searchCategoriesID) {
+            const responseProduct = await Product.find({category: id})
+            const responseSubCategory = await SubCategory.find({ category: id })
+            
+            res.status(200).json({searchCategoriesID, responseProduct, responseSubCategory});
+        } else {
+            res.status(404).json({ message: 'Categoria não encontrada' });
+        }
     } catch (error) {
-        res.status(500).json({message: 'O servidor não conseguiu encontrar o que lhe foi solicitado.'})
+        res.status(500).json({message: 'O servidor não conseguiu encontrar o que foi solicitado.'})
     }
 })
 
@@ -26,9 +35,14 @@ router.get('/category/get-sub-categorys/:id', async (req, res) => {
     try {
         const id = req.params.id;
         let searchSubCategoryID = await SubCategory.findById(id);
-        res.status(200).json(searchSubCategoryID, { status: 'Busca encontrada'})
+        if(searchSubCategoryID) {
+            const responseProductBySubCategory = await Product.find({ subcategory: id })
+            res.status(200).json({responseProductBySubCategory})
+        } else {
+            res.status(404).json({ message: 'O servidor não conseguiu encontrar o que foi solicitado.'})
+        }
     } catch (error) {
-        res.status(500).json({message: 'O servidor não conseguiu encontrar o que lhe foi solicitado.'})
+        res.status(500).json({message: 'O servidor não conseguiu encontrar o que foi solicitado.'})
     }
 })
 

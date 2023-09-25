@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Category = require('../models/categories');
 const SubCategory = require('../models/subcategories');
+const DataSheet = require('../models/ficha')
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -30,6 +31,10 @@ const productSchema = new mongoose.Schema({
     subcategory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: SubCategory
+    },
+    datasheet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: DataSheet
     }
 })
 
