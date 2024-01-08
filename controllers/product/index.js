@@ -53,7 +53,8 @@ router.post('/save-products', verifyToken, async (req, res) => {
     }
     try {
         // let {name, price, img, short_description, long_description, category, subcategory } = req.body;
-        const saveProduct = new Product(req.body);
+        const createProduct = {...req.body, author: req.user.user._id}
+        const saveProduct = new Product(createProduct);
         await saveProduct.save();
         res.status(201).json(saveProduct);
     } catch (error) {
@@ -103,7 +104,8 @@ router.post('/products/save-datasheet', verifyToken, async (req, res) => {
         return res.status(403).json({message: 'Acesso negado'});
     }
     try {
-        const newDatasheet = new DataSheet(req.body);
+        const createDatasheet = {...req.body, author: req.user.user._id}
+        const newDatasheet = new DataSheet(createDatasheet);
 
         await newDatasheet.save();
         res.status(201).json(newDatasheet);

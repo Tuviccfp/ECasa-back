@@ -103,4 +103,34 @@ router.delete('/delete-func/:id', verifyToken, async (req, res) => {
     }
 });
 
+//Routers for list admin and configurations
+router.get('/get-admins', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const getAdmins = await Admin.find({}).sort({createdAt: -1});
+        res.status(200).json(getAdmins);
+    } catch (error) {
+        res.status(500).json({sucess: false, message: error.message});
+    }
+});
+
+router.get('/get-admins/:id', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const id = req.params.id;
+        const dataById = await Admin.findById(id);
+        if (!dataById) {
+            return res.status(404).json({message: 'Não é possível localizar o id'});
+        }
+        const response = await Admin.find({adminId: dataById.id}).sort({createdAt: -1});
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({sucess: false, message: error.message});
+    }
+});
+
 module.exports = router;

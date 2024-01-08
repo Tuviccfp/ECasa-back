@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Master = require('../../models/master');
 const Admin = require('../../models/admin');
+const Func = require('../../models/func');
 const {verifyToken} = require('../../middlewares/authMaster');
 
 router.post('/create-master-login', async (req, res) => {
@@ -11,7 +12,7 @@ router.post('/create-master-login', async (req, res) => {
             name,
             nickname,
             password
-        })
+        });
         await newMaster.save();
         res.status(201).json({sucess: true, message: 'Master created'});
     } catch (error) {
@@ -98,6 +99,56 @@ router.delete('/delete-admin/:id', verifyToken, async (req, res) => {
         }
         await Admin.findByIdAndDelete(dataById);
         res.status(204).json({message: 'Administrador deletado com sucesso.'});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({sucess: false, message: error.message});
+    }
+});
+
+//Func
+router.get('/get-func', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'master') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const getFunc = await Func.find({}).sort({createdAt: -1});
+        res.status(200).json(getFunc);
+    } catch (error) {
+        console.log('Error: ', error.message);
+        res.status(500).json({sucess: false, message: error.message});
+    }
+});
+
+router.get('/get-func/:id', verifyToken, async (req, res) => {
+    if(req.user.user.role !== 'master') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const id = req.params.id;
+        const dataById = await Func.findById(id);
+        if (!dataById) {
+            return res.status(404).json({message: 'Não é possível localizar o id'});
+        }
+        const response = await Func.find({funcId: dataById.id}).sort({createdAt: -1});
+        res.status(200).json(response); 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({sucess: false, message: error.message});
+    }
+});
+
+router.delete('/delete-func/:id', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'master') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const id = req.params.id;
+        const dataById = await Func.findById(id);
+        if(!dataById) {
+            return res.status(404).json({message: 'Não é possível localizar o id'});
+        }
+        await Func.findByIdAndDelete(dataById);
+        res.status(204).json({message: "Funcionário deletado com sucesso"});
     } catch (error) {
         console.log(error);
         res.status(500).json({sucess: false, message: error.message});
