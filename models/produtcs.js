@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const Category = require('../models/categories');
-const SubCategory = require('../models/subcategories');
-const DataSheet = require('../models/ficha')
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -24,17 +21,29 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    author: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+            required: true,
+        },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Func',
+            required: true,
+        }
+    ],
     category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: Category
+        ref: "Category"  
     },
     subcategory: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: SubCategory
+        ref: "SubCategory"
     },
-    datasheet: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: DataSheet
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 })
 

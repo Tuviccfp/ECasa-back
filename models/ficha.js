@@ -1,7 +1,19 @@
 const mongoose = require('mongoose');
-const Category = require('../models/categories');
+const Product = require('../models/produtcs')
 
 const fichaTecSchema = new mongoose.Schema({
+    author: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+            required: true,
+        },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Func',
+            required: true,
+        }
+    ],
     marca: {
         type: String,
         required: true,
@@ -11,15 +23,15 @@ const fichaTecSchema = new mongoose.Schema({
         required: true,
     },
     dataFab: {
-        type: Number,
+        type: String,
         required: true
     },
     dataVal: {
-        type: Number,
+        type: String,
         required: true,
     },
     dimensions: {
-        type: String && Number,
+        type: String,
         required: true,
     },
     pound: {
@@ -73,6 +85,14 @@ const fichaTecSchema = new mongoose.Schema({
     manufacturer: {
         type: String,
         required: true
+    },
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    },
+    creteadAt: {
+        type: Date,
+        default: Date.now
     }
 })
 

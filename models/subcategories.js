@@ -6,9 +6,25 @@ const subCategorieSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    author: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+            required: true,
+        },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Func',
+            required: true,
+        }
+    ],
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: Category
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 })
 
