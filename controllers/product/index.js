@@ -46,6 +46,7 @@ router.get('/product/search-products',  async (req, res) => {
     }
 })
 
+//Products router.
 router.post('/save-products', verifyToken, async (req, res) => {
     if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
         return res.status(403).json({message: 'Acesso negado'});
@@ -58,19 +59,6 @@ router.post('/save-products', verifyToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({message: 'Erro ao salvar um produto.'})
         console.log(error);
-    }
-})
-router.post('/products/save-datasheet', verifyToken, async (req, res) => {
-    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
-        return res.status(403).json({message: 'Acesso negado'});
-    }
-    try {
-        const newDatasheet = new DataSheet(req.body);
-
-        await newDatasheet.save();
-        res.status(201).json(newDatasheet);
-    } catch (error) {
-        res.status(500).json(error);
     }
 })
 
@@ -91,15 +79,72 @@ router.put('/products-updated/:id', verifyToken, async (req, res) => {
     }
 });
 
-router.delete('/products', verifyToken, (req, res) => {
+router.delete('/products-delete/:id', verifyToken, async (req, res) => {
     if (req.user.user.role !== 'admin') {
         return res.status(403).json({message: 'Acesso negado'});
     }
     try {
-        
+        const id = req.params.id;
+        const dataById = await Product.findById(id);
+        if (!dataById) {
+            return res.status(404).json({message: "Não é possível localizar o id"});
+        }
+        await Product.findByIdAndDelete(dataById);
+        res.status(204).json({message: "Produto deletado com sucesso"});
     } catch (error) {
-        
+        console.log(error);
+        res.status(500).json({sucess: false, message: error.message});
     }
-})
+});
 
-// module.exports = router;
+// Datasheet routers.
+router.post('/products/save-datasheet', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const newDatasheet = new DataSheet(req.body);
+
+        await newDatasheet.save();
+        res.status(201).json(newDatasheet);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+router.put('/products/datasheet-updated/:id', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const newDatasheet = new DataSheet(req.body);
+        const id = req.params.id;
+        const dataById = await DataSheet.findById(id);
+        if (!dataById) {
+            return res.status(404).json({message: "Não é possível localizar o id"})
+        }
+       const updatedDatasheet = await DataSheet.findByIdAndUpdate(id, req.body, { new: true });
+        res.status(201).json(updatedDatasheet);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+router.delete('/products/datasheet-delete/:id', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const id = req.params.id;
+        const dataById = await DataSheet.findById(id);
+        if (!dataById) {
+            return res.status(404).json({message: "Não é possível localizar o id"})
+        }
+        await DataSheet.findByIdAndDelete(dataById);
+        res.status(201).json({message: "Ficha técnica deletada com sucesso."});
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+module.exports = router;
