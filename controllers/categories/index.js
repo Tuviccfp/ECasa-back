@@ -5,7 +5,10 @@ const SubCategory = require('./../../models/subcategories');
 const Product = require('./../../models/produtcs')
 const { verifyToken } = require('../../middlewares/authMaster');
 
-router.get('/categories', async (req, res) => {
+router.get('/categories', verifyToken, async (req, res) => {
+    if(req.user.user.role !== 'admin' && req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
     try {
         let searchCategories = await Category.find({}, null);
         res.status(200).json(searchCategories);
@@ -32,27 +35,14 @@ router.get('/categories/:id', async (req, res) => {
     }
 })
 
-router.get('/category/get-sub-categorys/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        let searchSubCategoryID = await SubCategory.findById(id);
-        if(searchSubCategoryID) {
-            const responseProductBySubCategory = await Product.find({ subcategory: id })
-            res.status(200).json({responseProductBySubCategory})
-        } else {
-            res.status(404).json({ message: 'O servidor não conseguiu encontrar o que foi solicitado.'})
-        }
-    } catch (error) {
-        res.status(500).json({message: 'O servidor não conseguiu encontrar o que foi solicitado.'})
-    }
-})
+
 
 router.post('/save-categories', verifyToken, async (req, res) => {
-    if(req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+    if(req.user.user.role !== 'admin' && req.user.user.role !== 'func') {
         return res.status(403).json({message: 'Acesso negado'});
     }
     try {
-            const createCategorie = {...req.body, author: req.user.user.role}
+            const createCategorie = {...req.body, author: req.user.user._id}
             const saveNewCategorie = new Category(createCategorie); 
             await saveNewCategorie.save();
             res.status(201).json(saveNewCategorie);
@@ -95,7 +85,41 @@ router.delete('/delete-categories/:id', verifyToken, async (req, res) => {
     }
 });
 
+//Subcategorys Routers
+router.get('/category/get-sub-category', async (req, res) => {
+    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const getSubCat = await SubCategory.find({}).sort({createdAt: -1});
+        res.status(200).json(getSubCat);
+    } catch (error) {
+        res.status(500).json({sucess: false, message: 'Erro ao capturar os dados.'});
+    }
+});
+
+router.get('/category/get-sub-categorys/:id', async (req, res) => {
+    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
+    try {
+        const id = req.params.id;
+        let searchSubCategoryID = await SubCategory.findById(id);
+        if(searchSubCategoryID) {
+            const responseProductBySubCategory = await Product.find({ subcategory: id });
+            res.status(200).json({responseProductBySubCategory});
+        } else {
+            res.status(404).json({ message: 'O servidor não conseguiu encontrar o que foi solicitado.'});
+        }
+    } catch (error) {
+        res.status(500).json({message: 'O servidor não conseguiu encontrar o que foi solicitado.'});
+    }
+});
+
 router.post('/category/save-subcategories', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin' || req.user.user.role !== 'func') {
+        return res.status(403).json({message: 'Acesso negado'});
+    }
     try {
         const createSubCategorie = {...req.body, author: req.user.user._id};
         let saveNewSubCategory = new SubCategory(createSubCategorie);

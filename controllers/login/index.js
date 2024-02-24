@@ -4,7 +4,8 @@ const Master = require('../../models/master');
 const Admin = require('../../models/admin');
 const Func = require('../../models/func');
 const User = require('../../models/user'); 
-const { createToken } = require('../../middlewares/authMaster');
+const { createToken, verifyToken } = require('../../middlewares/authMaster');
+const InvalidatedToken = require('../../models/invalid');
 
 router.post('/login-master', async (req, res) => {
     const {nickname, password} = req.body;
@@ -90,4 +91,23 @@ router.post('/login-user', async (req, res) => {
     }
 });
 
-module.exports = router
+// Router logout
+router.post('/logout', verifyToken, async (req, res) => {
+    try {
+        const token = req.headers['xoxota'];
+        const existingToken = await InvalidatedToken.findOne({ token });
+
+        if (existingToken) {
+            return res.status(401).json({message: 'Token já inválido'});
+        }
+
+        const invalidatedToken = new InvalidatedToken({token});
+        await invalidatedToken.save();
+        res.status(200).json({ message: 'Logout realizado com sucesso'});
+    } catch (error) {
+        console.error('Erro durante o logout:', error);
+        res.status(500).json({ message: 'Erro durante o logout.' });
+    }
+})
+
+module.exports = router;

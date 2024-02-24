@@ -8,7 +8,7 @@ const createToken = (user) => {
 
 const verifyToken = (req, res, next) => {
     const token = req.headers['xoxota'];
-
+    // console.log('Received toke: ', token)
     if(!token) {
         console.log('Token não autorizado.');
         return res.status(401).json({message: "Token não autorizado."})

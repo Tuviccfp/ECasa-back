@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Admin = require('../../models/admin');
 const Func = require('../../models/func');
 const jwt = require('jsonwebtoken');
@@ -36,12 +37,12 @@ router.post('/create-user-func', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/get-func', verifyToken, async (req, res) => {
-    if(req.user.user.role !== 'admin') {
+router.get('/get-func-by-admin', verifyToken, async (req, res) => {
+    if(req.user.user.role !== 'admin' && req.user.user.role !== 'func') {
         return res.status(403).json({message: 'Acesso negado'});
     }
     try {
-        const getFunc = Func.find().sort({createdAt: -1});
+        const getFunc = await Func.find().populate('author').sort({createdAt: -1});
         res.status(200).json(getFunc);
     } catch (error) {
         console.log('Error: ', error.message);
@@ -49,20 +50,23 @@ router.get('/get-func', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/get-func/:id', verifyToken, async (req, res) => {
+router.get('/get-func-by-admin/:id', verifyToken, async (req, res) => {
     if (req.user.user.role !== 'admin') {
         return res.status(403).json({message: 'Forbidden'});
     }
     try {
         const id = req.params.id;
+
         const dataById = await Func.findById(id);
         if (!dataById) {
             return res.status(404).json({message: "Não é possível localizar o id"});
         }
-        const response = await Func.find({funcId: dataById.id}).sort({createdAt: -1});
-        res.status(200).json(response);
+        console.log(dataById);
+        console.log(id);
+        // const response = await Func.find({funcId: dataById.id}).sort({createdAt: -1});
+        res.status(200).json(dataById);
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
         res.status(500).json({sucess: false, message: error.message});
     }
 });
@@ -85,7 +89,7 @@ router.put('/updated-func/:id', verifyToken, async (req, res) => {
     }
 });
 
-router.delete('/delete-func/:id', verifyToken, async (req, res) => {
+router.delete('/delete-func-by-admin/:id', verifyToken, async (req, res) => {
     if(req.user.user.role !== 'admin') {
         return res.status(403).json({message: 'Forbidden'});
     }
@@ -104,12 +108,12 @@ router.delete('/delete-func/:id', verifyToken, async (req, res) => {
 });
 
 //Routers for list admin and configurations
-router.get('/get-admins', verifyToken, async (req, res) => {
-    if (req.user.user.role !== 'admin') {
+router.get('/get-admins-by-admins', verifyToken, async (req, res) => {
+    if (req.user.user.role !== 'admin' && req.user.user.role !== 'func') {
         return res.status(403).json({message: 'Acesso negado'});
     }
     try {
-        const getAdmins = await Admin.find({}).sort({createdAt: -1});
+        const getAdmins = await Admin.find({}).populate('author').sort({createdAt: -1});
         res.status(200).json(getAdmins);
     } catch (error) {
         res.status(500).json({sucess: false, message: error.message});

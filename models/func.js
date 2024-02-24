@@ -46,4 +46,4 @@ funcSchema.methods.isCorrect = function (password, next) {
 }
 
 
-module.exports = mongoose.model('Func', funcSchema)
+module.exports = mongoose.model('Func', funcSchema);

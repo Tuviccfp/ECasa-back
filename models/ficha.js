@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Product = require('../models/produtcs')
 
 const fichaTecSchema = new mongoose.Schema({
     author: [
